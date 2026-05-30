@@ -1,0 +1,11 @@
+# Build output
+build/
+build-*/
+*.dylib
+*.o
+
+# Local scratch (preserved old token-walk port + analysis notes)
+tmp/
+
+# macOS
+.DS_Store
