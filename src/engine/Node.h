@@ -68,5 +68,7 @@ NodeRef extractStructureBetween(Node* startingElement, Node* endingElement);
 
 // convenience
 bool nameIn(const std::string& name, const std::vector<std::string>& names);
+Node* firstChild(Node* value);   // Children.FirstOrDefault()
+Node* lastChild(Node* value);    // Children.LastOrDefault()
 
 } // namespace pmsf

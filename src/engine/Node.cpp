@@ -99,6 +99,15 @@ bool nameIn(const std::string& name, const std::vector<std::string>& names) {
     return false;
 }
 
+Node* firstChild(Node* value) {
+    if (!value || value->children.empty()) return nullptr;
+    return value->children.front().get();
+}
+Node* lastChild(Node* value) {
+    if (!value || value->children.empty()) return nullptr;
+    return value->children.back().get();
+}
+
 std::vector<Node*> childrenByName(Node* value, const std::string& name) {
     std::vector<Node*> out;
     if (!value) return out;
