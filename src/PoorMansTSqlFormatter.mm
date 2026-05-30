@@ -17,6 +17,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include <string>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <cmath>
@@ -148,6 +149,35 @@ static void formatSqlCommand() {
 - (void)windowWillClose:(NSNotification*)n { (void)n; [NSApp stopModal]; }
 @end
 
+// Collapse hard line-wraps within each paragraph (so the text view soft-wraps),
+// while preserving blank-line paragraph separators.
+static std::string reflowParagraphs(const std::string& in) {
+    std::string s = replaceAll(replaceAll(in, "\r\n", "\n"), "\r", "\n");
+    std::vector<std::string> out;       // assembled paragraphs
+    std::string para;
+    std::istringstream iss(s);
+    std::string line;
+    auto flush = [&]() {
+        if (!para.empty()) { out.push_back(para); para.clear(); }
+    };
+    while (std::getline(iss, line)) {
+        // trim trailing/leading whitespace on each source line
+        size_t b = line.find_first_not_of(" \t");
+        size_t e = line.find_last_not_of(" \t");
+        std::string trimmed = (b == std::string::npos) ? "" : line.substr(b, e - b + 1);
+        if (trimmed.empty()) { flush(); continue; }
+        if (!para.empty()) para += " ";
+        para += trimmed;
+    }
+    flush();
+    std::string result;
+    for (size_t i = 0; i < out.size(); ++i) {
+        if (i) result += "\n\n";
+        result += out[i];
+    }
+    return result;
+}
+
 static void showAboutBox(NSWindow* parent) {
     @autoreleasepool {
         const CGFloat W = 560, H = 420, pad = 16;
@@ -178,18 +208,15 @@ static void showAboutBox(NSWindow* parent) {
         ver.frame = NSMakeRect(rx, H - pad - 48, rw, 18);
         [cv addSubview:ver];
 
-        NSTextField* copy = [NSTextField labelWithString:@"Copyright © 2011-2017 Tao Klerks"];
-        copy.frame = NSMakeRect(rx, H - pad - 70, rw, 18);
-        [cv addSubview:copy];
-
         // description + full AGPL license in a scrollable, read-only text view
-        NSScrollView* scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(rx, pad + 40, rw, H - pad - 80 - 40)];
+        NSScrollView* scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(rx, pad + 40, rw, H - 2 * pad - 96)];
         scroll.hasVerticalScroller = YES;
         scroll.borderType = NSBezelBorder;
         NSTextView* tv = [[NSTextView alloc] initWithFrame:scroll.bounds];
         tv.editable = NO;
         tv.font = [NSFont fontWithName:@"Menlo" size:10] ?: [NSFont systemFontOfSize:10];
-        std::string body = std::string("A simple free (AGPL) T-SQL Formatting Plugin for Notepad++.\n\n") + kAgplLicenseText;
+        std::string body = std::string("A simple free (AGPL) T-SQL Formatting Plugin for Notepad++.\n\n")
+                         + reflowParagraphs(kAgplLicenseText);
         tv.string = [NSString stringWithUTF8String:body.c_str()];
         scroll.documentView = tv;
         [cv addSubview:scroll];
