@@ -9,3 +9,6 @@ tmp/
 
 # macOS
 .DS_Store
+
+# Release staging
+dist/
