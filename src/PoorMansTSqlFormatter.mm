@@ -54,9 +54,12 @@ static std::string pluginsConfigDir() {
     char buf[2048]; buf[0] = '\0';
     nppData._sendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, sizeof(buf), (intptr_t)buf);
     if (buf[0] != '\0') return std::string(buf);
-    // Fallback for older hosts.
+    // Fallback only if the host returns empty (it does not on shipped versions):
+    // the app-support base, NOT a legacy ~/.nextpad++ dot-folder.
     @autoreleasepool {
-        NSString* dir = [NSHomeDirectory() stringByAppendingPathComponent:@".nextpad++/plugins/Config"];
+        NSString* dir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
+                             NSUserDomainMask, YES).firstObject
+                             stringByAppendingPathComponent:@"Nextpad++/plugins/Config"];
         return std::string([dir UTF8String]);
     }
 }

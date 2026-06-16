@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(PoorMansTSqlFormatter LANGUAGES CXX OBJCXX)
+project(PoorMansTSqlFormatter VERSION 1.0.1 LANGUAGES CXX OBJCXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,7 +40,10 @@ set_target_properties(PoorMansTSqlFormatter PROPERTIES
     SUFFIX ".dylib"
     OUTPUT_NAME "PoorMansTSqlFormatter")
 
-set(PLUGIN_INSTALL_DIR "$ENV{HOME}/.nextpad++/plugins/PoorMansTSqlFormatter")
+# Stamp version into the dylib Mach-O current_version (Plugins Admin reads it).
+target_link_options(PoorMansTSqlFormatter PRIVATE "-Wl,-current_version,${PROJECT_VERSION}")
+
+set(PLUGIN_INSTALL_DIR "$ENV{HOME}/Library/Application Support/Nextpad++/plugins/PoorMansTSqlFormatter")
 install(TARGETS PoorMansTSqlFormatter DESTINATION "${PLUGIN_INSTALL_DIR}")
 
 # ── standalone corpus-validation harness (not installed) ─────────────────────
